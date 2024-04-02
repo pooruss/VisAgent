@@ -1,0 +1,45 @@
+
+engine:
+  inference_mode: image #text, image, mix
+  max_step: 10 #最多连续进行多少次action
+
+ocr:
+  method: pytesseract # pytesseract, easyocr, surya
+
+code_env:
+  work_directory: ./code_workspace/
+  max_entry_nums_for_level: 20
+
+web_env:
+  bbox:
+    font_ttf: "/System/Library/Fonts/ArialHB.ttc"
+
+vectordb_config:
+  api_key: "60ed8b28-edb2-4ba0-ac55-2e4ecc8d46a0"
+  db_environment: "us-west4-gcp-free"
+  db_index: "xagent20"
+
+recorder:
+  record_dir: "running_records"
+
+request:
+  default_model: "gpt-4"
+  default_timeout: 600
+  gpt:
+    api_key: "sk-HnWMDXLBQtnsX20vD897De7524B94e3aAb6bE5F12f1b2314"
+    base_url: "https://aihubmix.com/v1"
+    max_tokens: 1000
+    temperature: 0.8
+  gpt4v:
+    # api_key: "sk-dMEct6QNGiA505piB10c6952112549779466AdB711801dEc"
+    # base_url: "https://sailaoda.cn/v1"
+    api_key: "sk-HnWMDXLBQtnsX20vD897De7524B94e3aAb6bE5F12f1b2314"
+    base_url: "https://aihubmix.com/v1"
+    max_tokens: 1000
+    temperature: 0.8
+  claude:
+    api_key: "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"
+    max_tokens: 1000
+    temperature: 0.8
+    request_timeout: 60
+
