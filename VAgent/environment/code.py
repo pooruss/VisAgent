@@ -7,6 +7,7 @@ from typing import List, Tuple, Dict, Any
 from PIL import Image
 from nbclient.exceptions import CellExecutionError,DeadKernelError
 from VAgent.config import CONFIG
+from VAgent.environment.code_action.action_schema import ACTION_SCHEMA
 from VAgent.utils.ocr import easyocr_get_text, pytesseract_get_text, surya_get_text
 from VAgent.models import EnvState, Action, ActionStatusCode
 from VAgent.environment.base import BaseEnvironment
@@ -20,6 +21,12 @@ class CodeEnvironment(BaseEnvironment):
         self.action_schema = dict()
 
         self.work_directory = self.config.code_env.work_directory
+        self.data_path = self.config.code_env.data_path
+        if not os.path.exists(self.data_path):
+            raise RuntimeError
+        self.data = open(self.data_path, "r")
+        self.data = self.data.read()[:500]
+        print(self.data)
 
         if not os.path.exists(self.work_directory):
             os.mkdir(self.work_directory,mode=0o777)
@@ -28,6 +35,7 @@ class CodeEnvironment(BaseEnvironment):
         self.nb = nbformat.v4.new_notebook(
             metadata = {'kernelspec': {'name': 'python', 'language': 'python', 'display_name': 'python'}})
         self.nbc = NotebookClient(self.nb,timeout=self.config.code_env.timeout)
+        self.action_schema = ACTION_SCHEMA
 
     def _running(self):
         if self.nbc.kc is not None:
@@ -142,39 +150,51 @@ class CodeEnvironment(BaseEnvironment):
     
     def step(self, action: Action) -> Tuple[ActionStatusCode, str]:
         """Execute code cell."""
+        if action.name == "execute_shell":
+            code = action.arguments["code"]
+            if "cell_index" in action.arguments:
+                cell_index = action.arguments["cell_index"]
+            else:
+                cell_index = None
+            if "reset" in action.arguments:
+                reset = action.arguments["reset"]
+            else:
+                reset = False
+            
+            output_path = action.arguments["output_path"]
 
-        code = action.arguments["code"]
-        if "cell_index" in action.arguments:
-            cell_index = action.arguments["cell_index"]
-        if "reset" in action.arguments:
-            reset = action.arguments["reset"]
+            # code = self._fix_escape(code)
+            if reset or not self._running():
+                self._reset()
+            if cell_index is None or cell_index == len(self.nb.cells) or len(self.nb.cells) == 0:
+                self.nb.cells.append(nbformat.v4.new_code_cell(code))
+                cell_index = len(self.nb.cells) - 1
+            else:
+                self.nb.cells[cell_index] = nbformat.v4.new_code_cell(code)
 
-        # code = self._fix_escape(code)
-        if reset or not self._running():
-            self._reset()
-        if cell_index is None or cell_index == len(self.nb.cells) or len(self.nb.cells) == 0:
-            self.nb.cells.append(nbformat.v4.new_code_cell(code))
-            cell_index = len(self.nb.cells) - 1
+            try:
+                self.nbc.execute_cell(self.nb.cells[-1], len(self.nb.cells) - 1)
+            except CellExecutionError as e:
+                return ActionStatusCode.FAILED, e
+            except DeadKernelError as e:
+                return ActionStatusCode.FAILED, e
+
+            nbformat.write(self.nb, os.path.join(self.work_directory, self.config.code_env.save_name))
+
+            return ActionStatusCode.SUCCESS, output_path
+        
+        elif action.name == "feedback":
+            feedback = action.arguments["text"]
+            return ActionStatusCode.SUCCESS, feedback
+
         else:
-            self.nb.cells[cell_index] = nbformat.v4.new_code_cell(code)
-
-        try:
-            self.nbc.execute_cell(self.nb.cells[-1], len(self.nb.cells) - 1)
-        except CellExecutionError as e:
-            pass
-        except DeadKernelError as e:
-            self._reset()
-
-        nbformat.write(self.nb, os.path.join(self.work_directory, self.config.code_env.save_name))
-
-        return ActionStatusCode.SUCCESS, self._format_outputs(self.nb.cells[cell_index].outputs, cell_index, reraise=True, return_binary=True)
+            raise RuntimeError(f"Unrecognized action: {action.name}")
 
 
 if __name__ == '__main__':
     code_env = CodeEnvironment(CONFIG)
-    code_str = """from PIL import Image
-image = Image.open('/Users/user/Downloads/git_clone/VAgent/running_records/2024_01_26_00_21_21fbaefb20/Trajectory/Step_0/screenshot.png')
-image.show()"""
-    ret = code_env.execute_cell(code_str)
+    code_str = """import pandas as pd\nimport matplotlib.pyplot as plt\n\n# Data loading\ndata = pd.read_csv('data.csv')\n\n# Data visualization\nplt.figure(figsize=(10, 6))\nplt.plot(data['name'], data['age'], marker='o') # Add markers\nplt.xlabel('Name')\nplt.ylabel('Age')\nplt.title('Age by Name') # Updated title\nplt.xticks(rotation=45) # Rotate x-axis labels\nplt.grid(axis='y') # Add grid to y-axis\nplt.tight_layout() # Adjust layout to prevent clipping of tick-labels\n\n# Save the figure and show plot\nplt.savefig('improved_linear_plot.png')\nplt.show()\nplt.close()\n"""
+    action = Action(name="execute_shell", arguments={"code": code_str, "output_path": "./1.jpg"})
+    ret = code_env.step(action=action)
     print(ret)
     

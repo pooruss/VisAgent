@@ -12,6 +12,11 @@ ACTION_SCHEMA = \
                         "type": "string",
                         "description": "python code to be executed, make sure it is valid python code with right format."
                     },
+                    "output_path": {
+                        "type": "string",
+                        "description": "The output image path.",
+                        "default": "./"
+                    },
                     "cell_index": {
                         "type": "integer",
                         "description": "the index of the cell to be insert and overwrite `code`, default to `None`, which means append new cell.",
@@ -23,8 +28,44 @@ ACTION_SCHEMA = \
                         "default": False
                     },
                 },
-            "required": ["code"]
+            "required": ["code", "output_path"]
             }
         },
+    },
+    "exit": {
+        "action_name": "exit",
+        "action_schema": {
+            "name": "exit",
+            "description": "Exit the task if you think the task is completed.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "Task execution summary and final answer to response to the user.",
+                        "default": ""
+                    }
+                }
+            },
+            "required": ["text"]
+        }
+    },
+    "feedback": {
+        "action_name": "feedback",
+        "action_schema": {
+            "name": "exit",
+            "description": "Give the textual feedback of a data visualization result.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "The textual feedback.",
+                        "default": ""
+                    }
+                }
+            },
+            "required": ["text"]
+        }
     }
 }

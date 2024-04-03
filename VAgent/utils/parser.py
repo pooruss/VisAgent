@@ -1,6 +1,33 @@
 import re
 import json
 
+def feedback_parser(string):
+    return string
+    
+def code_parser(string):
+    print(string)
+    # 使用正则表达式匹配
+    thought_pattern = re.compile(r"Thought: (.*?)\n\nOutput path:", re.DOTALL)
+    output_path_pattern = re.compile(r"Output path: (.*?)\n\nCode:", re.DOTALL)
+    code_pattern = re.compile(r"Code:\n(.*)", re.DOTALL)
+
+    thought_match = thought_pattern.search(string)
+    code_match = code_pattern.search(string)
+    output_path_match = output_path_pattern.search(string)
+
+    # 提取匹配的结果
+    thought_content = thought_match.group(1).strip() if thought_match else None
+    code_content = code_match.group(1).strip() if code_match else None
+    output_path_content = output_path_match.group(1).strip() if output_path_match else None
+    
+    if code_content:
+        pattern = r'```python(.*?)```'
+        code_content = re.findall(pattern, code_content, re.DOTALL)[0]
+    else:
+        print(f"Error parsing code: \n{string}")
+        code_content = None
+    return thought_content, code_content, output_path_content
+
 # For prediction parsing, into ReACT format
 def react_parser(string):
     thought = [string[string.find("Thought: ") + len("Thought: "): string.find("\nAction: ")]]

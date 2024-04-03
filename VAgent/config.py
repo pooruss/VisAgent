@@ -76,13 +76,6 @@ class VAgentConfig(BaseModel):
         
         gpt4v: GPT4VConfig = GPT4VConfig()
 
-        class ClaudeConfig(BaseModel):
-            api_key: str = "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"
-            max_tokens: int = 1000
-            temperature: float = 0.8
-            
-        claude: ClaudeConfig = ClaudeConfig()
-
     request: RequestConfig = RequestConfig()
 
     class LoggerConfig(BaseModel):
@@ -116,7 +109,7 @@ class VAgentConfig(BaseModel):
     recorder: RecorderConfig = RecorderConfig()
 
     class EngineConfig(BaseModel):
-        max_step: int = 10
+        max_step: int = 5
         inference_mode: Literal["text", "image", "mix"] = 'text'
         react_model: Literal["gpt-3.5-turbo-16k", "gpt-4", "gpt-4-vision-preview"] = 'gpt-4'
 
@@ -136,7 +129,6 @@ class VAgentConfig(BaseModel):
         height: int = 1080
         debug: bool = False # If true, save screenshot and bbox under debug_figs
         cookie_path: str = "assets/cookies"
-        
         class BBoxConfig(BaseModel):
             font_ttf: str = "/System/Library/Fonts/ArialHB.ttc"
             font_size: int = 25
@@ -150,6 +142,7 @@ class VAgentConfig(BaseModel):
         max_entry_nums_for_level: int = 20
         timeout: int = 300
         save_name: str = "python_notebook.ipynb"
+        data_path: str = "/Users/user/Downloads/git_clone/VisAgent/assets/vis_data/onlinefoods.csv"
     
     code_env: CodeEnvConfig = CodeEnvConfig()
 
@@ -163,6 +156,13 @@ class VAgentConfig(BaseModel):
 
     document: DocumentConfig = DocumentConfig()
     
+    class VectorDBConfig(BaseModel):
+        api_key: str = "60ed8b28-edb2-4ba0-ac55-2e4ecc8d46a0"
+        db_environment: str = "us-west4-gcp-free"
+        db_index: str = "xagent20"
+
+    vectordb_config: VectorDBConfig = VectorDBConfig()
+
     def to_dict(self):
         return self.model_dump(exclude=['api_keys'])
 
