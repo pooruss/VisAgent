@@ -54,7 +54,7 @@ class VAgentConfig(BaseModel):
         default_timeout: int = 600
 
         class GPTConfig(BaseModel):
-            api_key: str = "sk-dMEct6QNGiA505piB10c6952112549779466AdB711801dEc"
+            api_key: str = "sk-ZISKrmh9DWXw781S31F0B0F02b76468b895fC7DfFcEbEd8d"
             base_url: str = "https://sailaoda.cn/v1"
             max_tokens: int = 1000
             temperature: float = 0.8
@@ -69,7 +69,7 @@ class VAgentConfig(BaseModel):
         ada_embedding: AdaEmbeddingConfig = AdaEmbeddingConfig()
 
         class GPT4VConfig(BaseModel):
-            api_key: str = "sk-dMEct6QNGiA505piB10c6952112549779466AdB711801dEc"
+            api_key: str = "sk-ZISKrmh9DWXw781S31F0B0F02b76468b895fC7DfFcEbEd8d"
             base_url: str = "https://sailaoda.cn/v1"
             max_tokens: int = 1000
             temperature: float = 0.8
@@ -110,39 +110,16 @@ class VAgentConfig(BaseModel):
 
     class EngineConfig(BaseModel):
         max_step: int = 5
-        inference_mode: Literal["text", "image", "mix"] = 'text'
         react_model: Literal["gpt-3.5-turbo-16k", "gpt-4", "gpt-4-vision-preview"] = 'gpt-4'
 
     engine: EngineConfig = EngineConfig()
-
-    class OSEnvConfig(BaseModel):
-        tool_info_file: str = "assets/computer/tool_info.json"
-        offline: bool = False
-    
-    os_env: OSEnvConfig = OSEnvConfig()
-    
-    class WebEnvConfig(BaseModel):
-        tool_info_file: str = "assets/computer/tool_info.json"
-        offline: bool = False
-        timeout: int = 30000
-        width: int = 1920
-        height: int = 1080
-        debug: bool = False # If true, save screenshot and bbox under debug_figs
-        cookie_path: str = "assets/cookies"
-        class BBoxConfig(BaseModel):
-            font_ttf: str = "/System/Library/Fonts/ArialHB.ttc"
-            font_size: int = 25
-            
-        bbox: BBoxConfig = BBoxConfig()
-        
-    web_env: WebEnvConfig = WebEnvConfig()
 
     class CodeEnvConfig(BaseModel):
         work_directory: str = "code_workspace"
         max_entry_nums_for_level: int = 20
         timeout: int = 300
         save_name: str = "python_notebook.ipynb"
-        data_path: str = "/Users/user/Downloads/git_clone/VisAgent/assets/vis_data/onlinefoods.csv"
+        data_path: str = "/Users/user/Downloads/git_clone/VisAgent/assets/vis_data/McDonald_financial_statements/McDonalds_Financial_Statements.csv"
     
     code_env: CodeEnvConfig = CodeEnvConfig()
 
@@ -155,13 +132,6 @@ class VAgentConfig(BaseModel):
         document_path: str = "assets/documents"
 
     document: DocumentConfig = DocumentConfig()
-    
-    class VectorDBConfig(BaseModel):
-        api_key: str = "60ed8b28-edb2-4ba0-ac55-2e4ecc8d46a0"
-        db_environment: str = "us-west4-gcp-free"
-        db_index: str = "xagent20"
-
-    vectordb_config: VectorDBConfig = VectorDBConfig()
 
     def to_dict(self):
         return self.model_dump(exclude=['api_keys'])

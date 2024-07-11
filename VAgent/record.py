@@ -54,6 +54,9 @@ class Recorder(metaclass=Singleton):
     
     def save_trajectory(self, step_count, **kwargs):
         os.makedirs(os.path.join(self.root_dir, "Trajectory", f"Step_{step_count}"), exist_ok=True)
+
+        feedback = kwargs.pop("feedback", None)
+        
         action = kwargs.pop("action", None)
         if action:
             action_cnt = 0
@@ -63,6 +66,7 @@ class Recorder(metaclass=Singleton):
             with open(
                 os.path.join(self.root_dir, "Trajectory", f"Step_{step_count}", f"action_{action_cnt}.json"), "w", encoding="utf-8") as writer:
                 action = action.to_json()
+                action["feedback"] = feedback
                 json.dump(action, writer, indent=2, ensure_ascii=False)
 
         env_state = kwargs.pop("env_state", None)

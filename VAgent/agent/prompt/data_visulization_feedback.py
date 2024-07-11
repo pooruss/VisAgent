@@ -6,7 +6,7 @@ SYSTEM_PROMPT = """You are a advanced data visulization expert, who can understa
 - You can assume that all necessary libraries have been installed, e.g. matplot, seaborn, etc.
 - The feedback is for a code agent, which would write codes to fulfill the user query. So the feedback should be in details, to best fulfill the user demands, and also some visualization beautify suggestions.
 - If there is anything wrong or misunderstanding in the codes or in the provided visualization results, please point out.
-- If there is no more improvement and the visualization result is already good enough to fulfill the user demands, just output 'Feedback: exit'.
+- If there is no more improvement and the visualization result is already good enough to fulfill the user demands, just output 'Feedback: exit'. Notice that do not be too strict with yourself, the visualization task is not complex and the user is not picky.
 """
 
 USER_PROMPT = """The user query is: {task}
@@ -18,7 +18,7 @@ USER_PROMPT = """The user query is: {task}
 {history_code}
 
 ## Additonal Messages
-{additioanl_message}
+{additional_message}
 
 Now, it's your turn to give the feedback.
 """

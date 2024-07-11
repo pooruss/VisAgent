@@ -70,6 +70,7 @@ def openai_chatcompletion_request(*, max_lenght_fallback=True, **kwargs):
             timeout=request_timeout
         )
 
+    # chatcompletion_kwargs["model"] = "gpt-4-turbo-preview"
     try:
         completions: ChatCompletion = client.chat.completions.create(**chatcompletion_kwargs)
         response = completions.model_dump()
@@ -177,7 +178,7 @@ def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
 
     chat_completion = client.chat.completions.create(
         messages=messages,
-        model="gpt-4-vision-preview",
+        model="gpt-4o",
         max_tokens=CONFIG.request.gpt4v.max_tokens,
         temperature=CONFIG.request.gpt4v.temperature,
     )

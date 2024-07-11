@@ -34,7 +34,7 @@ class VisAgent(BaseAgent):
             data: str,
             history_code : str = "",
             image: Image = None,
-            additioanl_message: str = ""
+            additional_message: str = ""
         ) -> Action:
 
         system_prompt = VIS_SYSTEM_PROMPT
@@ -60,7 +60,7 @@ class VisAgent(BaseAgent):
                 data=data,
                 history_code=history_code,
                 available_actions=available_actions_msg,
-                additioanl_message=additioanl_message
+                additional_message=additional_message
             ) + format_prompt
                     }
                 ]
@@ -83,7 +83,7 @@ class VisAgent(BaseAgent):
                             data=data,
                             history_code=history_code,
                             available_actions=available_actions_msg,
-                            additioanl_message=additioanl_message
+                            additional_message=additional_message
                         ) + format_prompt
                     }
                 ]
@@ -94,6 +94,7 @@ class VisAgent(BaseAgent):
                 break
         
         vagent_actions = []
+
         action = Action(
             thought=thought,
             name="execute_shell",

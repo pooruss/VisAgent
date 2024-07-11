@@ -20,18 +20,18 @@ USER_PROMPT = """The user query is: {task}
 {history_code}
 
 ## Additonal Messages
-{additioanl_message}
+{additional_message}
 
 Now, it's your turn to give the codes.
 """
 
 RESPONSE_FORMAT = """
-*Note that*: Your response format should be:
+*Note that*: Your response format should be( only one '\n' following 'Code:' ):
 
 Thought: your thought...
 
-Output path: {image_path}
+Code:\n```python\nimport ...\n```
 
-Code:\n```python\nimport ...
+Output path: {image_path}
 """
 

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     short_memory = BaseMemory()
 
     # User task
-    query = "Help me do EDA on the data, with apple's product style, e.g. simple and effective."
+    query = "Perform EDA on the data in an eco-friendly style"
     
     # Run the task
     image = engine.run(task=query, env=env, memory=short_memory)
