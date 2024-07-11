@@ -143,7 +143,7 @@ def ada_embedding_request(text: str):
     reraise=True,
 )
 def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
-    print(CONFIG.request.gpt4v.api_key)
+    # print(CONFIG.request.gpt4v.api_key)
     client = OpenAI(
         api_key=CONFIG.request.gpt4v.api_key,
         base_url=CONFIG.request.gpt4v.base_url
@@ -186,7 +186,7 @@ def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
     try:
         res = chat_completion.choices[0].message.content
     except Exception as e:
-        print(res)
+        # print(res)
         logger.debug(
             f"Error when requesting gpt4-v: {e}",
             Fore.YELLOW

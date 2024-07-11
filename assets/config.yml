@@ -1,7 +1,6 @@
 
 engine:
-  inference_mode: image #text, image, mix
-  max_step: 10 #最多连续进行多少次action
+  max_step: 4 #最多连续进行n+1次action
 
 ocr:
   method: pytesseract # pytesseract, easyocr, surya
@@ -9,31 +8,23 @@ ocr:
 code_env:
   work_directory: ./code_workspace/
   max_entry_nums_for_level: 20
-
-web_env:
-  bbox:
-    font_ttf: "/System/Library/Fonts/ArialHB.ttc"
-
-vectordb_config:
-  api_key: "60ed8b28-edb2-4ba0-ac55-2e4ecc8d46a0"
-  db_environment: "us-west4-gcp-free"
-  db_index: "xagent20"
+  data_path: /Users/user/Downloads/git_clone/VisAgent/assets/vis_data/McDonald_financial_statements/McDonalds_Financial_Statements.csv
 
 recorder:
-  record_dir: "running_records"
+  record_dir: "history_data"
 
 request:
-  default_model: "gpt-4"
+  default_model: "gpt-4o"
   default_timeout: 600
   gpt:
-    api_key: "sk-HnWMDXLBQtnsX20vD897De7524B94e3aAb6bE5F12f1b2314"
+    api_key: "sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810"
     base_url: "https://aihubmix.com/v1"
     max_tokens: 1000
     temperature: 0.8
   gpt4v:
     # api_key: "sk-dMEct6QNGiA505piB10c6952112549779466AdB711801dEc"
-    # base_url: "https://sailaoda.cn/v1"
-    api_key: "sk-HnWMDXLBQtnsX20vD897De7524B94e3aAb6bE5F12f1b2314"
+    # base_url: "https://aihubmix.com/v1"
+    api_key: "sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810"
     base_url: "https://aihubmix.com/v1"
     max_tokens: 1000
     temperature: 0.8

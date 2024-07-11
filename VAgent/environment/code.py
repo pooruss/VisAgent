@@ -175,9 +175,9 @@ class CodeEnvironment(BaseEnvironment):
             try:
                 self.nbc.execute_cell(self.nb.cells[-1], len(self.nb.cells) - 1)
             except CellExecutionError as e:
-                return ActionStatusCode.FAILED, str(e)[-100:]
+                return ActionStatusCode.FAILED, str(e)[-500:]
             except DeadKernelError as e:
-                return ActionStatusCode.FAILED, str(e)[-100:]
+                return ActionStatusCode.FAILED, str(e)[-500:]
 
             nbformat.write(self.nb, os.path.join(self.work_directory, self.config.code_env.save_name))
 

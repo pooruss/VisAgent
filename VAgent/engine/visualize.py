@@ -4,19 +4,20 @@ from PIL import Image
 from VAgent.config import CONFIG
 from VAgent.models import EnvState, Action, ActionStatusCode
 from VAgent.engine.base import BaseEngine
-from VAgent.agent import ActionAgent, AnalyzeAgent, VisAgent, FeedBackAgent
+from VAgent.agent import VisAgent, FeedBackAgent
 from VAgent.environment import CodeEnvironment
 from VAgent.memory import BaseMemory
 from VAgent.log import logger
-from VAgent.record import recorder
+from VAgent.record import Recorder
 from colorama import Fore, Style
 
 class VisEngine(BaseEngine):
-    def __init__(self, config: CONFIG):
+    def __init__(self, config: CONFIG, recorder: Recorder):
         super().__init__(config=config)
         self.agent = VisAgent(config)
         self.code_agent = VisAgent(config)
         self.feedback_agent = FeedBackAgent(config)
+        self.recorder = recorder
         
     def run(self, task: str, env: CodeEnvironment, memory: BaseMemory=None):
         
@@ -26,17 +27,17 @@ class VisEngine(BaseEngine):
         step_count = 0
         feedback = ""
         error_msgs = ""
-        while True and step_count <= self.config.engine.max_step:
+        while step_count <= self.config.engine.max_step:
             
             # Get current environment state and executable actions
             action_names, action_schemas = env.get_available_actions()
-            logger.typewriter_log(f"Current available actions:\n", Fore.YELLOW, f"{Fore.GREEN}{action_names}{Style.RESET_ALL}")
+            logger.typewriter_log(f"Current available actions for step {step_count}:\n", Fore.YELLOW, f"{Fore.GREEN}{action_names}{Style.RESET_ALL}")
 
             # Insert env state to agent memory
             # memory.insert(step_count, env_state=env_state)
 
             # Store env state to local memory
-            # recorder.save_trajectory(step_count, env_state=env_state)
+            # self.recorder.save_trajectory(step_count, env_state=env_state)
 
             # Predict code action. TODO: output action directly or call gpt4v again to do it
             max_try = 0
@@ -57,7 +58,7 @@ class VisEngine(BaseEngine):
 
                 if action.name == "exit":
                     # Save action locally
-                    recorder.save_trajectory(step_count=step_count, action=action)
+                    self.recorder.save_trajectory(step_count=step_count, action=action, task=task)
                     return env
                 
                 action_status, visual_result = env.step(action)
@@ -68,8 +69,8 @@ class VisEngine(BaseEngine):
                         break
                 else:
                     action.observation = visual_result
-                    recorder.save_trajectory(step_count=step_count, action=action)
-                    logger.typewriter_log(f"Action Status:", Fore.YELLOW, f"{Fore.GREEN}{action_status}, {visual_result}{Style.RESET_ALL}")
+                    self.recorder.save_trajectory(step_count=step_count, action=action, task=task)
+                    logger.typewriter_log(f"Action Status for try {max_try}:", Fore.YELLOW, f"{Fore.GREEN}{action_status}, {visual_result}{Style.RESET_ALL}")
                     error_msgs = visual_result
                     history_code = action.arguments["code"]
                     max_try += 1
@@ -93,7 +94,7 @@ class VisEngine(BaseEngine):
             image = Image.open(visual_result)
             # image.show()
             # Save action locally
-            # recorder.save_trajectory(step_count=step_count, action=action)
+            # self.recorder.save_trajectory(step_count=step_count, action=action)
 
             # Predict feedback action. # TODO
             feedback_action = self.feedback_agent.predict(
@@ -107,16 +108,15 @@ class VisEngine(BaseEngine):
 
             feedback = feedback_action[0].arguments["text"]
 
-            recorder.save_trajectory(step_count=step_count, action=action, feedback=feedback)
+            self.recorder.save_trajectory(step_count=step_count, action=action, feedback=feedback, task=task)
 
-            if action.name == "exit":
+            if action.name == "exit" or "Feedback: exit" in feedback:
                 logger.typewriter_log(f"Query completed. Exiting...", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
                 # Save action locally
-                # recorder.save_trajectory(step_count=step_count, action=action)
+                # self.recorder.save_trajectory(step_count=step_count, action=action)
                 return env
             
             logger.typewriter_log(f"Action Feedback:", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
-
 
             step_count += 1
             

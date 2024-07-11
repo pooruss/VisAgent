@@ -28,7 +28,7 @@ def dump_common_things(object):
         return method()
     
 
-class Recorder(metaclass=Singleton):
+class Recorder():
     """Recorder that records the running process of VAgent.
 
     Functionalities:
@@ -36,11 +36,17 @@ class Recorder(metaclass=Singleton):
     - store running records to database and file.
     """
 
-    def __init__(self, config: CONFIG):
+    def __init__(self, config: CONFIG, strip=None):
         
         """Initialize files."""
         now = int(round(time.time() * 1000))
-        strip = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime(now / 1000)) + uuid.uuid4().hex[:8]
+        if strip is None:
+            strip = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime(now / 1000)) + uuid.uuid4().hex[:8]
+        else:
+            strip += ("_" + time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime(now / 1000)) + uuid.uuid4().hex[:8])
+
+        print("record dir:")
+        print(strip)
         self.root_dir = os.path.join(CONFIG.recorder.record_dir, strip)
         os.makedirs(self.root_dir, exist_ok=True)
         os.makedirs(os.path.join(self.root_dir, "LLM_input_output_pair"), exist_ok=True)
@@ -63,10 +69,12 @@ class Recorder(metaclass=Singleton):
             while os.path.exists(os.path.join(self.root_dir, "Trajectory", f"Step_{step_count}", f"action_{action_cnt}.json")):
                 action_cnt += 1
 
+            task = kwargs.pop("task", None)
             with open(
                 os.path.join(self.root_dir, "Trajectory", f"Step_{step_count}", f"action_{action_cnt}.json"), "w", encoding="utf-8") as writer:
                 action = action.to_json()
                 action["feedback"] = feedback
+                action["task"] = task
                 json.dump(action, writer, indent=2, ensure_ascii=False)
 
         env_state = kwargs.pop("env_state", None)
@@ -114,4 +122,4 @@ class Recorder(metaclass=Singleton):
             }
             json.dump(llm_inout_record, writer, indent=2, ensure_ascii=False)
         
-recorder = Recorder(CONFIG)
+# recorder = Recorder(CONFIG)

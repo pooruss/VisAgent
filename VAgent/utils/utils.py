@@ -11,3 +11,7 @@ def generate_url_id(url):
     md5.update(url_encoded)
     # 返回MD5哈希值的十六进制表示形式
     return md5.hexdigest()
+
+def clean_json(json_str):
+    json_res = json_str.split("```json", 1)[-1].split("```", 1)[0].strip() if "```json" in json_str else json_str
+    return json_res
