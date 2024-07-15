@@ -14,7 +14,7 @@ def clean_json(json_str):
 
 def openai_request(messages, use_json=True):
     client = OpenAI(
-        api_key='sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810',
+        api_key='api_key',
         base_url="https://aihubmix.com/v1"
     )
 
@@ -25,7 +25,6 @@ def openai_request(messages, use_json=True):
         max_tokens=4096
     )
     
-    print(response.choices[0].message.content)
     return response.choices[0].message.content
 
 def generate(data_url, data_overview):
@@ -44,19 +43,51 @@ def generate(data_url, data_overview):
 if __name__ == "__main__":
 
     data_root = "datasets"
+    max_query = 60
+    query_cnt = 0
     for url in os.listdir(data_root):
+
+        csv_files = []
+
+        has_query = False
         for csv_file in os.listdir(os.path.join(data_root, url)):
-            if "csv" not in csv_file:
+            if csv_file.endswith(".query.json"):
+                query_cnt += 1
+                has_query  = True
+            if not csv_file.endswith(".csv"):
                 continue
-            
-            try:
-                data_path = os.path.join(data_root, url, csv_file)
-                data = open(data_path, "r")
-                data_overview = data.read()[:500]
-                query_data = generate(url, data_overview)
-                json.dump(query_data, open(data_path + ".query.json", "w"), indent=4)
+
+            csv_files.append(csv_file)
+        
+        if has_query:
+            continue
+        
+        if len(csv_files) <= 0:
+            continue
+
+        csv_file = random.sample(csv_files, k=1)[0]
+        
+        if query_cnt >= max_query:
+            continue
+        
+        try:
+            data_path = os.path.join(data_root, url, csv_file)
+            data = open(data_path, "r")
+            data_overview = data.read()[:500]
+            query_path = data_path + ".query.json"
+            if os.path.exists(query_path):
+                query_data = json.load(open(query_path, "r"))
                 print(query_data)
-                break
-            except Exception as e:
-                print(f"Error: {e}")
-                continue
+                if "query" in query_data:
+                    continue
+
+            print(query_path)
+            query_data = generate(url, data_overview)
+            json.dump(query_data, open(data_path + ".query.json", "w"), indent=4)
+            query_cnt += 1
+            # print(query_data)
+            print(query_cnt)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            continue

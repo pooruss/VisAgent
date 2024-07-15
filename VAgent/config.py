@@ -54,8 +54,8 @@ class VAgentConfig(BaseModel):
         default_timeout: int = 600
 
         class GPTConfig(BaseModel):
-            api_key: str = "sk-ZISKrmh9DWXw781S31F0B0F02b76468b895fC7DfFcEbEd8d"
-            base_url: str = "https://sailaoda.cn/v1"
+            api_key: str = ""
+            base_url: str = ""
             max_tokens: int = 1000
             temperature: float = 0.8
 
@@ -69,8 +69,8 @@ class VAgentConfig(BaseModel):
         ada_embedding: AdaEmbeddingConfig = AdaEmbeddingConfig()
 
         class GPT4VConfig(BaseModel):
-            api_key: str = "sk-ZISKrmh9DWXw781S31F0B0F02b76468b895fC7DfFcEbEd8d"
-            base_url: str = "https://sailaoda.cn/v1"
+            api_key: str = ""
+            base_url: str = ""
             max_tokens: int = 1000
             temperature: float = 0.8
         
@@ -110,7 +110,13 @@ class VAgentConfig(BaseModel):
 
     class EngineConfig(BaseModel):
         max_step: int = 5
-        react_model: Literal["gpt-3.5-turbo-16k", "gpt-4", "gpt-4-vision-preview"] = 'gpt-4'
+        max_self_reflexion_step: int = 3
+        code_model: str = "gpt-4o"
+        feedback_model: str = "gpt-4o"
+        code_temperature: float = 0.8
+        feedback_temperature: float = 0.8
+        enable_feedback: bool = True
+        json_mode: bool = True
 
     engine: EngineConfig = EngineConfig()
 

@@ -67,5 +67,5 @@ def download_and_extract_kaggle_datasets(keyword, max_datasets=5, timeout=10):
 
 if __name__ == "__main__":
     keyword = 'financial'
-    max_datasets = 50  # 指定要下载的数据集数量
+    max_datasets = 100  # 指定要下载的数据集数量
     download_and_extract_kaggle_datasets(keyword, max_datasets=max_datasets)

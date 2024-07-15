@@ -1,6 +1,14 @@
 
 engine:
-  max_step: 4 #最多连续进行n+1次action
+  max_step: 5 #最多连续进行n次action
+  max_self_reflexion_step: 3
+  code_model: gpt-4o
+  code_temperature: 0.8
+  feedback_model: gpt-4o
+  feedback_temperature: 0.8
+  enable_feedback: True
+  json_mode: True
+  feedback_json_mode: True
 
 ocr:
   method: pytesseract # pytesseract, easyocr, surya
@@ -11,25 +19,23 @@ code_env:
   data_path: /Users/user/Downloads/git_clone/VisAgent/assets/vis_data/McDonald_financial_statements/McDonalds_Financial_Statements.csv
 
 recorder:
-  record_dir: "history_data"
+  record_dir: "history_data_qwen-turbo"
 
 request:
   default_model: "gpt-4o"
   default_timeout: 600
   gpt:
-    api_key: "sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810"
+    api_key: "api_key"
     base_url: "https://aihubmix.com/v1"
     max_tokens: 1000
     temperature: 0.8
   gpt4v:
-    # api_key: "sk-dMEct6QNGiA505piB10c6952112549779466AdB711801dEc"
-    # base_url: "https://aihubmix.com/v1"
-    api_key: "sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810"
+    api_key: "api_key"
     base_url: "https://aihubmix.com/v1"
     max_tokens: 1000
     temperature: 0.8
   claude:
-    api_key: "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"
+    api_key: "api_key"
     max_tokens: 1000
     temperature: 0.8
     request_timeout: 60

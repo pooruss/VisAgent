@@ -11,6 +11,8 @@ def rename_files_in_directory(directory):
             sanitized_filename = sanitize_filename(filename)
             if sanitized_filename != filename:
                 original_path = os.path.join(root, filename)
+                if os.path.isdir(original_path):
+                    continue
                 new_path = os.path.join(root, sanitized_filename)
                 print(f'Renaming: {original_path} -> {new_path}')
                 os.rename(original_path, new_path)
@@ -18,6 +20,8 @@ def rename_files_in_directory(directory):
             sanitized_dirname = sanitize_filename(dirname)
             if sanitized_dirname != dirname:
                 original_path = os.path.join(root, dirname)
+                if os.path.isdir(original_path):
+                    continue
                 new_path = os.path.join(root, sanitized_dirname)
                 print(f'Renaming: {original_path} -> {new_path}')
                 os.rename(original_path, new_path)

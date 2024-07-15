@@ -18,8 +18,15 @@ from VAgent.agent.prompt.data_visulization import (
     USER_PROMPT as VIS_USER_PROMPT,
     RESPONSE_FORMAT as VIS_FORMAT
 )
+
+from VAgent.agent.prompt.data_visulization_json_mode import (
+    SYSTEM_PROMPT as VIS_SYSTEM_PROMPT_JSON,
+    USER_PROMPT as VIS_USER_PROMPT_JSON,
+    RESPONSE_FORMAT as VIS_FORMAT_JSON
+)
 from VAgent.utils.parser import react_parser, react_parser_json, code_parser
 from VAgent.utils.image import img_to_base64, base64_to_image
+from VAgent.utils.utils import clean_json
 from VAgent.log import logger
 from colorama import Fore
 
@@ -34,12 +41,19 @@ class VisAgent(BaseAgent):
             data: str,
             history_code : str = "",
             image: Image = None,
-            additional_message: str = ""
+            additional_message: str = "",
+            model_name: str = "gpt-4o",
+            json_mode: bool = True
         ) -> Action:
 
-        system_prompt = VIS_SYSTEM_PROMPT
-        user_prompt = VIS_USER_PROMPT
-        format_prompt = VIS_FORMAT
+        if json_mode:
+            system_prompt = VIS_SYSTEM_PROMPT_JSON
+            user_prompt = VIS_USER_PROMPT_JSON
+            format_prompt = VIS_FORMAT_JSON
+        else:
+            system_prompt = VIS_SYSTEM_PROMPT
+            user_prompt = VIS_USER_PROMPT
+            format_prompt = VIS_FORMAT
         # DEBUGGING
         available_actions_msg = ""
         for action_schame in action_schemas:
@@ -65,8 +79,9 @@ class VisAgent(BaseAgent):
                     }
                 ]
                 response = openai_chatcompletion_request(
-                    model=self.config.request.default_model,
-                    messages=messages
+                    model=self.config.engine.code_model,
+                    messages=messages,
+                    temperature=self.config.engine.code_temperature
                 )
                 response = response["choices"][0]["message"]["content"]
                 (response)
@@ -87,9 +102,20 @@ class VisAgent(BaseAgent):
                         ) + format_prompt
                     }
                 ]
-                response = openai_vision_chatcompletion_request(messages, img_to_base64(image))
+                response = openai_vision_chatcompletion_request(messages, img_to_base64(image), model_name, json_mode)
             # print(response)
-            thought, code, output_path = code_parser(response)
+            if not json_mode:
+                thought, code, output_path = code_parser(response)
+            else:
+                result = clean_json(response)
+                result = json.loads(result)
+                thought = result["Thought"]
+                code = result["Code"].strip()
+                if code.startswith("```python"):
+                    code = code.replace("```python", "")
+                if code.endswith("```"):
+                    code = code[:-3]
+                output_path = result["Output path"]
             if code:
                 break
         

@@ -41,7 +41,7 @@ def openai_chatcompletion_request(*, max_lenght_fallback=True, **kwargs):
         kwargs.pop("model", CONFIG.request.default_model)
     )
     logger.debug("Completion using: " + model_name)
-    chatcompletion_kwargs = {"model": CONFIG.request.default_model}
+    chatcompletion_kwargs = {"model": model_name}
     request_timeout = kwargs.pop("request_timeout", 60)
     if "azure_endpoint" in chatcompletion_kwargs:
         azure_endpoint = chatcompletion_kwargs.pop("azure_endpoint", None)
@@ -142,7 +142,7 @@ def ada_embedding_request(text: str):
     ),
     reraise=True,
 )
-def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
+def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox, model_name: str="gpt-4o", temperature=0.8, max_tokens=4096, json_mode=False):
     # print(CONFIG.request.gpt4v.api_key)
     client = OpenAI(
         api_key=CONFIG.request.gpt4v.api_key,
@@ -156,7 +156,7 @@ def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
             image_content = {
                 "type": "image_url",
                 "image_url":{
-                    "url": f"data:image/jpeg;base64,{base64}"
+                    "url": f"data:image/png;base64,{base64}"
                 }
             }
             json_content.append(image_content)
@@ -164,7 +164,7 @@ def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
         image_content = {
             "type": "image_url",
             "image_url":{
-                "url": f"data:image/jpeg;base64,{base64_capture_bbox}"
+                "url": f"data:image/png;base64,{base64_capture_bbox}"
             }
         }
         json_content.append(image_content)
@@ -176,12 +176,21 @@ def openai_vision_chatcompletion_request(messages: list, base64_capture_bbox):
     #     "content": json_content,
     # })
 
-    chat_completion = client.chat.completions.create(
-        messages=messages,
-        model="gpt-4o",
-        max_tokens=CONFIG.request.gpt4v.max_tokens,
-        temperature=CONFIG.request.gpt4v.temperature,
-    )
+    if json_mode:
+        chat_completion = client.chat.completions.create(
+            messages=messages,
+            model=model_name,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            response_format={ "type": "json_object" }
+        )
+    else:
+        chat_completion = client.chat.completions.create(
+            messages=messages,
+            model=model_name,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
     res = ""
     try:
         res = chat_completion.choices[0].message.content

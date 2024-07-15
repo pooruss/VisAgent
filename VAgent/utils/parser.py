@@ -32,8 +32,8 @@ def code_parser(string):
     # print(string)
     # 使用正则表达式匹配
     thought_pattern = re.compile(r"Thought: (.*?)(?=\nCode:)", re.DOTALL)
-    output_path_pattern = re.compile(r"Output path: (.*)$", re.DOTALL)
     code_pattern = re.compile(r"Code:\n```python\n(.*?)\n```", re.DOTALL)
+    output_path_pattern = re.compile(r"Output path: (.*)$", re.DOTALL)
 
     thought_match = thought_pattern.search(string)
     code_match = code_pattern.search(string)

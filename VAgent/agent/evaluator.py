@@ -7,8 +7,7 @@ from VAgent.models import EvaluationResult
 from VAgent.agent.base import BaseAgent
 from VAgent.environment.base import BaseEnvironment
 from VAgent.memory import BaseMemory
-from VAgent.llm import (
-    openai_chatcompletion_request, 
+from VAgent.llm import ( 
     openai_vision_chatcompletion_request
 )
 

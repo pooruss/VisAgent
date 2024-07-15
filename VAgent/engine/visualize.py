@@ -14,7 +14,6 @@ from colorama import Fore, Style
 class VisEngine(BaseEngine):
     def __init__(self, config: CONFIG, recorder: Recorder):
         super().__init__(config=config)
-        self.agent = VisAgent(config)
         self.code_agent = VisAgent(config)
         self.feedback_agent = FeedBackAgent(config)
         self.recorder = recorder
@@ -27,7 +26,7 @@ class VisEngine(BaseEngine):
         step_count = 0
         feedback = ""
         error_msgs = ""
-        while step_count <= self.config.engine.max_step:
+        while step_count < self.config.engine.max_step:
             
             # Get current environment state and executable actions
             action_names, action_schemas = env.get_available_actions()
@@ -41,16 +40,24 @@ class VisEngine(BaseEngine):
 
             # Predict code action. TODO: output action directly or call gpt4v again to do it
             max_try = 0
-            while True and max_try < 3:
-                actions = self.code_agent.predict(
-                    task,
-                    action_schemas, 
-                    data=data,
-                    image=None,
-                    history_code=history_code,
-                    additional_message=f"{feedback}\n\nCode Execution Message:\n{error_msgs}"
-                )
-                
+            visual_result = None
+            while True and max_try < self.config.engine.max_self_reflexion_step:
+
+                try:
+                    actions = self.code_agent.predict(
+                        task,
+                        action_schemas, 
+                        data=data,
+                        image=None,
+                        history_code=history_code,
+                        additional_message=f"{feedback}\n\nCode Execution Message:\n{error_msgs}",
+                        model_name=self.config.engine.code_model,
+                        json_mode=self.config.engine.json_mode
+                    )
+                except:
+                    max_try += 1
+                    continue
+                    
                 action = actions[0]
 
                 logger.typewriter_log(f"Next Step Thoughts:", Fore.YELLOW, f"{Fore.RED}{action.thought}{Style.RESET_ALL}")
@@ -61,7 +68,11 @@ class VisEngine(BaseEngine):
                     self.recorder.save_trajectory(step_count=step_count, action=action, task=task)
                     return env
                 
-                action_status, visual_result = env.step(action)
+                try:
+                    action_status, visual_result = env.step(action)
+                except:
+                    max_try += 1
+                    continue
 
                 if action_status == ActionStatusCode.SUCCESS:
                     time.sleep(5)
@@ -91,32 +102,34 @@ class VisEngine(BaseEngine):
                 observation=visual_result
             )
             
-            image = Image.open(visual_result)
-            # image.show()
-            # Save action locally
-            # self.recorder.save_trajectory(step_count=step_count, action=action)
-
-            # Predict feedback action. # TODO
-            feedback_action = self.feedback_agent.predict(
-                task,
-                action_schemas, 
-                data=data,
-                image=image,
-                history_code=history_code,
-                additional_message=feedback
-            )
-
-            feedback = feedback_action[0].arguments["text"]
-
-            self.recorder.save_trajectory(step_count=step_count, action=action, feedback=feedback, task=task)
-
-            if action.name == "exit" or "Feedback: exit" in feedback:
-                logger.typewriter_log(f"Query completed. Exiting...", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
+            if self.config.engine.enable_feedback:
+                image = Image.open(visual_result)
+                # image.show()
                 # Save action locally
                 # self.recorder.save_trajectory(step_count=step_count, action=action)
-                return env
-            
-            logger.typewriter_log(f"Action Feedback:", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
+
+                # Predict feedback action. # TODO
+                feedback_action = self.feedback_agent.predict(
+                    task,
+                    action_schemas, 
+                    data=data,
+                    image=image,
+                    history_code=history_code,
+                    additional_message=feedback,
+                    model_name=self.config.engine.feedback_model
+                )
+
+                feedback = feedback_action[0].arguments["text"]
+
+                self.recorder.save_trajectory(step_count=step_count, action=action, feedback=feedback, task=task)
+
+                if action.name == "exit" or "Feedback: exit" in feedback:
+                    logger.typewriter_log(f"Query completed. Exiting...", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
+                    # Save action locally
+                    # self.recorder.save_trajectory(step_count=step_count, action=action)
+                    return env
+                
+                logger.typewriter_log(f"Action Feedback:", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
 
             step_count += 1
             

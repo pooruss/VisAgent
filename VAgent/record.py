@@ -45,9 +45,7 @@ class Recorder():
         else:
             strip += ("_" + time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime(now / 1000)) + uuid.uuid4().hex[:8])
 
-        print("record dir:")
-        print(strip)
-        self.root_dir = os.path.join(CONFIG.recorder.record_dir, strip)
+        self.root_dir = os.path.join(config.recorder.record_dir, strip)
         os.makedirs(self.root_dir, exist_ok=True)
         os.makedirs(os.path.join(self.root_dir, "LLM_input_output_pair"), exist_ok=True)
         os.makedirs(os.path.join(self.root_dir, "Trajectory"), exist_ok=True)
