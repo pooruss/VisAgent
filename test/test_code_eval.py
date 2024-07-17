@@ -33,7 +33,7 @@ def process_trajectory(record, data_root):
         image_path = action_result["arguments"]["output_path"]
         task = action_result["task"]
 
-        if image_path is None or not os.path.exists(image_path):
+        if image_path is None or not os.path.exists(image_path) or action_result["status"] != 0:
             results = {
                 "score": 0,
                 "is_pass": False,
@@ -77,37 +77,93 @@ def process_records(records, data_root, results):
     
     results.append((total_cnt, score_sum, pass_sum, code_error_sum))
 
+
+def count_null_feedback(base_directory):
+    total_actions = 0
+    null_feedback_count = 0
+    
+    for sub_dir in os.listdir(base_directory):
+        sub_dir_path = os.path.join(base_directory, sub_dir)
+        trajectory_path = os.path.join(sub_dir_path, 'Trajectory')
+        # print(trajectory_path)
+        if os.path.isdir(trajectory_path):
+            for root, dirs, files in os.walk(trajectory_path):
+                for file in files:
+                    # print(file)
+                    if file.endswith('.json') and "action" in file:
+                        file_path = os.path.join(root, file)
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            # print(data)
+                            total_actions += 1
+                            # print(data.get('feedback'))
+                            status = data["status"]
+                            if status != 0:
+                                null_feedback_count += 1
+    
+    if total_actions == 0:
+        return 0.0
+    
+    null_feedback_ratio = null_feedback_count / total_actions
+    return null_feedback_ratio
+
+
 if __name__ == '__main__':
-    data_root = "/Users/user/Downloads/git_clone/VisAgent/history_data_qwen-turbo"
+    root_names = [
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_claude-3-5-sonnet-20240620",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_gpt-4o_visagent",
+        "/Users/user/Downloads/git_clone/VisAgent/history_data_gpt-4o",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_gpt-4o_sr",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_gpt-4o_react",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_gpt-3.5-turbo-16k",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_qwen-turbo",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_deepseek-chat",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_gemini-pro",
+        # "/Users/user/Downloads/git_clone/VisAgent/history_data_glm-3-turbo",
+    ]
 
-    records = [record for record in os.listdir(data_root) if "http" in record]
+    result_dict = {}
+    for root_name in root_names:
+        data_root = root_name
+        records = [record for record in os.listdir(data_root) if "http" in record]
 
-    num_threads = 5
-    records_per_thread = len(records) // num_threads
+        num_threads = 5
+        records_per_thread = len(records) // num_threads
 
-    threads = []
-    results = []
-    for i in range(num_threads):
-        start_index = i * records_per_thread
-        end_index = None if i == num_threads - 1 else (i + 1) * records_per_thread
-        thread_records = records[start_index:end_index]
+        threads = []
+        results = []
+        for i in range(num_threads):
+            start_index = i * records_per_thread
+            end_index = None if i == num_threads - 1 else (i + 1) * records_per_thread
+            thread_records = records[start_index:end_index]
 
-        thread = threading.Thread(target=process_records, args=(thread_records, data_root, results))
-        threads.append(thread)
-        thread.start()
+            thread = threading.Thread(target=process_records, args=(thread_records, data_root, results))
+            threads.append(thread)
+            thread.start()
 
-    for thread in threads:
-        thread.join()
+        for thread in threads:
+            thread.join()
 
-    # Combine results from all threads
-    total_cnt = sum(result[0] for result in results)
-    score_sum = sum(result[1] for result in results)
-    pass_sum = sum(result[2] for result in results)
-    code_error_sum = sum(result[3] for result in results)
+        # Combine results from all threads
+        total_cnt = sum(result[0] for result in results)
+        score_sum = sum(result[1] for result in results)
+        pass_sum = sum(result[2] for result in results)
+        code_error_sum = sum(result[3] for result in results)
 
-    score_avg = float(score_sum / total_cnt) if total_cnt else 0
-    pass_avg = float(pass_sum / total_cnt) if total_cnt else 0
-    code_error_avg = float(code_error_sum / total_cnt) if total_cnt else 0
+        score_avg = float(score_sum / total_cnt) if total_cnt else 0
+        pass_avg = float(pass_sum / total_cnt) if total_cnt else 0
+        code_error_avg = float(code_error_sum / total_cnt) if total_cnt else 0
 
-    print(total_cnt)
-    print(score_avg, pass_avg, code_error_avg)
+        print(total_cnt)
+        print(score_avg, pass_avg, code_error_avg)
+
+        # error rate
+        ratio = count_null_feedback(data_root)
+        print(f"代码执行出错的 action 占比: {ratio:.2%}")
+
+        result_dict[data_root] = {
+            "score": score_avg,
+            "pass": pass_avg,
+            "error": ratio
+        }
+    print(result_dict)

@@ -54,7 +54,8 @@ class VisEngine(BaseEngine):
                         model_name=self.config.engine.code_model,
                         json_mode=self.config.engine.json_mode
                     )
-                except:
+                except Exception as e:
+                    print(f"Error when generation code: {e}")
                     max_try += 1
                     continue
                     
@@ -86,7 +87,7 @@ class VisEngine(BaseEngine):
                     history_code = action.arguments["code"]
                     max_try += 1
             
-            if not os.path.exists(visual_result):
+            if visual_result is None or not os.path.exists(visual_result):
                 raise RuntimeError(f"Can not find output path, might due to parsing error or code running error: {visual_result}")
             
             history_code = action.arguments["code"]
@@ -104,9 +105,6 @@ class VisEngine(BaseEngine):
             
             if self.config.engine.enable_feedback:
                 image = Image.open(visual_result)
-                # image.show()
-                # Save action locally
-                # self.recorder.save_trajectory(step_count=step_count, action=action)
 
                 # Predict feedback action. # TODO
                 feedback_action = self.feedback_agent.predict(
@@ -125,12 +123,13 @@ class VisEngine(BaseEngine):
 
                 if action.name == "exit" or "Feedback: exit" in feedback:
                     logger.typewriter_log(f"Query completed. Exiting...", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
-                    # Save action locally
-                    # self.recorder.save_trajectory(step_count=step_count, action=action)
                     return env
                 
                 logger.typewriter_log(f"Action Feedback:", Fore.YELLOW, f"{Fore.GREEN}{feedback}{Style.RESET_ALL}")
 
+            else:
+                self.recorder.save_trajectory(step_count=step_count, action=action, task=task)
+                
             step_count += 1
             
         return image

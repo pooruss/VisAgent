@@ -108,6 +108,7 @@ class VisAgent(BaseAgent):
                 thought, code, output_path = code_parser(response)
             else:
                 result = clean_json(response)
+                print(result)
                 result = json.loads(result)
                 thought = result["Thought"]
                 code = result["Code"].strip()

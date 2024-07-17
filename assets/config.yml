@@ -25,12 +25,12 @@ request:
   default_model: "gpt-4o"
   default_timeout: 600
   gpt:
-    api_key: "api_key"
+    api_key: "sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810"
     base_url: "https://aihubmix.com/v1"
     max_tokens: 1000
     temperature: 0.8
   gpt4v:
-    api_key: "api_key"
+    api_key: "sk-vAjSo8FwpoiMM01FEfB337D75e6440848e8b89Aa18Ca3810"
     base_url: "https://aihubmix.com/v1"
     max_tokens: 1000
     temperature: 0.8
