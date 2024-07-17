@@ -1,47 +1,84 @@
-# VAgent
+# VisAgent: Empowering Financial Visualization in Business Intelligence
 
-## 测试代码
-- To test react:
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-```bash
-python test/test_react.py
-```
+## Project Overview
 
-- To test pipeline(workflow):
-```bash
-python test/test_pipeline.py
-```
-注意：现在pipeline的检索还没实现，需手动在`VAgent/engine/pipeline.py`里写workflow message来测试case
+VisAgent is an innovative framework designed to democratize data visualization through conversational interactions with Large Language Models (LLMs) and Multimodal Large Language Models (MLLMs). Users can articulate their visualization needs in natural language, and the agent interprets these requirements to generate insightful visual representations. This project addresses the on-demand personalized visualization problem, specifically in the financial sector.
 
-- To test web env,
+## Key Features
 
-```bash
-python test/test_web.py
-```
+- **VisAgent Framework**: A framework that facilitates the creation of personalized data visualizations through iterative improvements.
+- **VisQ Dataset**: A collection of 65 financial datasets sourced from Kaggle, used for testing and evaluating the performance of visualization models.
+- **VisEval Method**: A novel, automated evaluation method that uses advanced AI models to assess the generated visualizations, showing high correlation with human assessments.
 
-## 准备cookie以登录某网站页面
-如需拿到登录账号后的网站的前端信息，可以:
+## Installation
 
-- 在chrome浏览器页面登录后，右击 -> EditThisCookie -> 第一排第五个按钮（将cookie复制到剪切板）-> 贴在`assets/cookies/${website_name}.json`（能解决较多网站登录）
-- 如果1不行，根据`test/test_login_web.py`，把cookie传到env的context里
+1. Clone the repository:
 
-## 环境依赖
-- 如果遇到tesseract is not installed or it's not in your path, mac系统可以：
-```bash
-brew install tesseract
-brew list tesseract
-```
-把安装后的tesseract路径(一般为`/opt/homebrew/bin/tesseract`)在代码中指定：
-```python
-tesseract_cmd = '/opt/homebrew/bin/tesseract'
-```
-具体可参考:(https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)[https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i]
+    ```sh
+    git clone https://github.com/pooruss/VisAgent.git
+    cd VisAgent
+    ```
 
-windows可参考:(https://blog.csdn.net/deletewo/article/details/127332027)[https://blog.csdn.net/deletewo/article/details/127332027]
+2. Create and activate a virtual environment:
 
-## 全局config设置
-assets/config.yml里有些需配置的文件和信息
+    ```sh
+    python -m venv venv
+    source venv/bin/activate  # For Windows users, use `venv\Scripts\activate`
+    ```
 
-## 更新日志
-- **[2024/3/4]** 原子action space除去mouse scroll，取代为提前对页面scroll获取信息
+3. Install the required dependencies:
 
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+1. Modify the configuration in `assets/config.yml`, e.g. data path, agent configs, record directory, etc.
+2. Run VisAgent to generate visualizations:
+
+    ```sh
+    python main.py --input data/financial_dataset.csv --query "Generate a bar chart showing the count of financial news headlines categorized as positive, neutral, and negative, styled like Salesforce"
+    ```
+
+
+## Datasets
+
+The VisQ dataset includes 65 financial datasets, each accompanied by a unique personalized visualization query. This provides a robust platform for evaluating the performance of different data visualization models and systems.
+
+- [Download VisQ Dataset](https://github.com/pooruss/VisAgent/data/VisQ_dataset.zip)
+
+## Evaluation Method
+
+We have developed a comprehensive evaluation protocol and method that utilizes advanced AI models to automatically assess the generated visualizations. This method has been validated to show a high correlation with human assessments, ensuring consistency and objectivity in the results.
+
+## Experiment Results
+
+The results on the VisQ dataset, evaluated using VisEval, indicate that VisAgent successfully addresses 52.4% of the queries, outperforming the ReACT baseline by 32.4%. These findings highlight the strengths and potential of using LLM-based agents for personalized data visualization.
+
+- **Pass Rate**: 52.4%
+- **Improvement Over Baseline**: 32.4%
+
+## Contributing
+
+We welcome contributions in various forms, including but not limited to:
+
+- Submitting issues
+- Performing code reviews
+- Submitting pull requests
+
+Please make sure to read our [Contributing Guidelines](CONTRIBUTING.md) before making a contribution.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
+
+For any questions or suggestions, please contact Shihao Liang (shihaoliang0828@gmail.com).
+
+---
+
+Thank you for your interest and support in the VisAgent project!
